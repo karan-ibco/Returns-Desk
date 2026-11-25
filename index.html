@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7c3aed">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<title>Returns Desk</title>
+<script src="config.js"></script>
+<style>*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Inter,sans-serif;background:#0b0b1a;color:#fff;overflow:hidden}
+#scan{position:fixed;inset:0;background:radial-gradient(circle at 20% 10%,#7c3aed 0,transparent 45%),radial-gradient(circle at 90% 90%,#ec4899 0,transparent 45%),#0b0b1a;z-index:20;display:none}
+#vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.frame{position:absolute;left:7%;right:7%;top:30%;height:20%;border:3px solid rgba(255,255,255,.95);border-radius:22px;box-shadow:0 0 0 2000px rgba(0,0,0,.38);pointer-events:none}
+.laser{position:absolute;left:5%;right:5%;top:50%;height:2px;background:linear-gradient(90deg,transparent,#f472b6,transparent);box-shadow:0 0 12px #f472b6;animation:las 1.6s ease-in-out infinite}
+@keyframes las{0%,100%{transform:translateY(-34px)}50%{transform:translateY(34px)}}
+.glass{background:rgba(255,255,255,.14);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.25)}
+.bar{position:absolute;left:10px;right:10px;top:10px;top:max(10px,env(safe-area-inset-top));padding:10px 14px;border-radius:20px;display:flex;gap:10px;align-items:center}
+.bar .t{flex:1;min-width:0}.bar b{display:block;font-size:15px}.bar small{display:block;font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dot{width:10px;height:10px;border-radius:50%;background:#f59e0b;box-shadow:0 0 10px #f59e0b;flex-shrink:0}.dot.on{background:#22c55e;box-shadow:0 0 10px #22c55e}.dot.off{background:#ef4444;box-shadow:0 0 10px #ef4444}
+.cnt{padding:6px 12px;border-radius:14px;font-weight:800;background:linear-gradient(135deg,#8b5cf6,#ec4899)}
+.res{position:absolute;left:12px;right:12px;bottom:110px;bottom:calc(110px + env(safe-area-inset-bottom));padding:16px;border-radius:22px;font-weight:800;font-size:17px;text-align:center;line-height:1.3;transition:.2s}
+.res.ok{background:linear-gradient(135deg,#16a34a,#22c55e)}.res.warn{background:linear-gradient(135deg,#d97706,#f59e0b)}
+.res.dup,.res.err,.res.notfound{background:linear-gradient(135deg,#dc2626,#f43f5e);animation:shk .35s}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.bot{position:absolute;left:10px;right:10px;bottom:10px;bottom:max(10px,env(safe-area-inset-bottom));padding:10px;border-radius:22px;display:flex;gap:8px}
+.bot input{flex:1;min-width:0;padding:12px 14px;border-radius:14px;border:0;font-size:16px;background:rgba(255,255,255,.9);color:#111}
+.b{padding:12px 14px;border-radius:14px;border:0;font-weight:800;font-size:15px;background:rgba(255,255,255,.92);color:#111;cursor:pointer}
+.b.p{background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff}.b.x{background:rgba(239,68,68,.9);color:#fff}
+#snap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;text-align:center;width:86%}
+#snap .big{width:150px;height:150px;border-radius:50%;font-size:56px;border:0;color:#fff;background:linear-gradient(135deg,#8b5cf6,#ec4899);box-shadow:0 20px 60px rgba(236,72,153,.5);cursor:pointer}
+#snap p{opacity:.85;font-size:14px;margin-top:16px}
+
+#home{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 15% 15%,#8b5cf6 0,transparent 40%),radial-gradient(circle at 85% 30%,#ec4899 0,transparent 40%),radial-gradient(circle at 50% 95%,#06b6d4 0,transparent 45%),#0b0b1a}
+#home .card{width:100%;max-width:420px;border-radius:30px;padding:28px;text-align:center}
+#home h1{margin:6px 0 2px;font-size:26px}#home p{opacity:.85;margin:6px 0 18px;font-size:14px;line-height:1.45}
+#home .logo{width:72px;height:72px;border-radius:22px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,#8b5cf6,#ec4899);box-shadow:0 14px 40px rgba(236,72,153,.45)}
+#home .st{display:flex;gap:8px;align-items:center;justify-content:center;font-weight:700;margin-bottom:18px}
+#home .go{width:100%;padding:16px;border-radius:18px;border:0;font-size:18px;font-weight:800;color:#fff;background:linear-gradient(135deg,#8b5cf6,#ec4899);box-shadow:0 12px 30px rgba(139,92,246,.45)}
+
+#app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff;display:none}
+#off{position:fixed;top:0;left:0;right:0;background:#dc2626;color:#fff;text-align:center;padding:6px;z-index:30;display:none;font-size:13px;font-weight:700}
+#setup{position:fixed;inset:0;z-index:40;display:none;padding:28px;background:#0b0b1a}
+#setup input{width:100%;padding:13px;border-radius:14px;border:0;font-size:15px;margin:14px 0}
+</style>
+</head>
+<body>
+<div id="off">No internet — reconnect to continue</div>
+<iframe id="app" allow="camera; microphone; clipboard-read; clipboard-write; fullscreen" title="app"></iframe>
+<div id="setup"><h2>Setup</h2><p style="opacity:.8">Paste the Web App URL (Admin → Mobile App → copy).</p><input id="url" placeholder="https://script.google.com/macros/s/.../exec"><button class="b p" onclick="saveUrl()">Save &amp; open</button></div>
+<div id="home" style="display:none"><div class="card glass"><div class="logo">📷</div><h1 id="hmTitle">Phone Scanner</h1><p id="hmSub">Connecting…</p><div class="st"><span class="dot" id="hmDot"></span><span id="hmSt">Checking pairing…</span></div><button class="go" onclick="startScan()">Start scanning</button><p style="font-size:12px;margin-top:16px">Scans go straight to the PC screen (Pack / Pickup / Returns). Keep the PC on a scan page.</p></div></div>
+<div id="scan">
+  <video id="vid" playsinline muted></video>
+  <div class="frame"><div class="laser"></div></div>
+  <div id="snap"><label><button class="big" onclick="this.nextElementSibling.click()">📷</button><input type="file" accept="image/*" capture="environment" style="display:none" onchange="scPhoto(this)"></label><p>Tap, photograph the barcode, it's read instantly</p></div>
+  <div class="bar glass"><span class="dot" id="scDot"></span><div class="t"><b id="scTitle">Scan</b><small id="scSub"></small></div><span class="cnt" id="scCnt">0</span><button class="b" id="scTorch" style="display:none" onclick="scTorch()">🔦</button></div>
+  <div class="res glass" id="scRes">Point the camera at the barcode</div>
+  <div class="bot glass"><input id="scMan" placeholder="Type code" enterkeyhint="go" onkeydown="if(event.key==='Enter')scManual()"><button class="b p" onclick="scManual()">OK</button><label class="b" style="display:flex;align-items:center">📷<input type="file" accept="image/*" capture="environment" style="display:none" onchange="scPhoto(this)"></label><button class="b x" id="scX" onclick="scClose(true)">✕</button></div>
+</div>
+
+<script>
+const CFG = window.RD_CONFIG || {};
+const Q = new URLSearchParams(location.search);
+/* ===== SCANNER CORE (live camera → BarcodeDetector / ZXing-WASM; fallback photo capture) ===== */
+const SC={stream:null,track:null,det:null,loopT:null,last:'',lastAt:0,waiting:false,count:0,torch:false,continuous:true,cv:document.createElement('canvas'),transport:null,onClose:null};
+const $s=id=>document.getElementById(id);
+function loadZX(){ return new Promise((ok,no)=>{ if(window.ZXingWASM) return ok(); const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/zxing-wasm@2.2.4/dist/iife/reader/index.js'; s.onload=ok; s.onerror=no; document.head.appendChild(s); }); }
+async function scOpen(opts){
+  SC.transport=opts.transport; SC.continuous=opts.continuous!==false; SC.onClose=opts.onClose||null; SC.count=0; SC.waiting=false;
+  $s('scTitle').textContent=opts.title||'Scan'; $s('scCnt').textContent='0'; scRes('','Point the camera at the barcode');
+  $s('scan').style.display='block';
+  try{ history.pushState({sc:1},''); }catch(e){}
+  try{
+    SC.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});
+    const v=$s('vid'); v.srcObject=SC.stream; v.style.display='block'; $s('snap').style.display='none'; await v.play();
+    SC.track=SC.stream.getVideoTracks()[0];
+    try{ const cap=SC.track.getCapabilities(); $s('scTorch').style.display=cap.torch?'inline-block':'none'; if(cap.focusMode&&cap.focusMode.indexOf('continuous')>=0) SC.track.applyConstraints({advanced:[{focusMode:'continuous'}]}); }catch(e){}
+    if('BarcodeDetector' in window){
+      let f=['code_128','code_39','code_93','ean_13','ean_8','upc_a','upc_e','itf','codabar','qr_code','data_matrix','pdf417'];
+      try{ const sup=await BarcodeDetector.getSupportedFormats(); f=f.filter(x=>sup.indexOf(x)>=0); }catch(e){}
+      SC.det=new BarcodeDetector({formats:f});
+    } else { await loadZX(); SC.det=null; }
+    scLoop();
+  }catch(e){
+    $s('vid').style.display='none'; $s('snap').style.display='block';
+    scRes('warn','Live camera not allowed here — tap the camera button to snap each barcode');
+  }
+}
+async function scDetect(src, w, h, hard){
+  if(SC.det){ const r=await SC.det.detect(src); if(!r.length) return ''; const b=r.find(x=>x.format==='code_128')||r[0]; return b.rawValue; }
+  await loadZX();
+  const c=SC.cv, k=Math.min(1, 1280/w); c.width=Math.round(w*k); c.height=Math.round(h*k);
+  const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(src,0,0,c.width,c.height);
+  const r=await ZXingWASM.readBarcodes(x.getImageData(0,0,c.width,c.height),{tryHarder:!!hard,maxNumberOfSymbols:4});
+  if(!r.length) return ''; const b=r.find(x=>x.format==='Code128')||r[0]; return b.text;
+}
+async function scLoop(){
+  if(!SC.stream) return;
+  try{ const v=$s('vid'); if(v.readyState>=2 && !SC.waiting){ const t=await scDetect(v, v.videoWidth, v.videoHeight, false); if(t) scHit(t); } }catch(e){}
+  SC.loopT=setTimeout(scLoop, SC.det?110:160);
+}
+async function scPhoto(inp){
+  const f=inp.files[0]; inp.value=''; if(!f) return;
+  scRes('','Reading photo…');
+  try{
+    const bmp=await createImageBitmap(f);
+    let t=''; try{ t=await scDetect(bmp, bmp.width, bmp.height, true); }catch(e){}
+    if(!t && SC.det){ SC.det=null; t=await scDetect(bmp, bmp.width, bmp.height, true); }
+    if(t){ SC.last=''; scHit(t); } else { scRes('err','No barcode found — hold closer, fill the frame, retry'); scBeep('err'); }
+  }catch(e){ scRes('err','Could not read photo'); }
+}
+function scHit(code){
+  code=String(code||'').trim(); const n=Date.now();
+  if(!code || SC.waiting || (code===SC.last && n-SC.lastAt<2500)) return;
+  SC.last=code; SC.lastAt=n; SC.waiting=true; scRes('','Checking '+code+' …');
+  const tm=setTimeout(()=>{ if(SC.waiting){ SC.waiting=false; scRes('err','No reply — check internet'); scBeep('err'); } }, 16000);
+  Promise.resolve(SC.transport(code)).then(r=>{ clearTimeout(tm); scResult(r||{level:'ok',msg:code}); }).catch(e=>{ clearTimeout(tm); scResult({level:'err',msg:e.message||String(e)}); });
+}
+function scResult(r){
+  SC.waiting=false;
+  if(r.level==='ok'||r.level==='warn'){ SC.count++; $s('scCnt').textContent=SC.count; }
+  scRes(r.level, r.msg); scBeep(r.level);
+  if(!SC.continuous) setTimeout(()=>scClose(false), 800);
+}
+function scManual(){ const v=$s('scMan').value.trim(); $s('scMan').value=''; if(v){ SC.last=''; scHit(v); } }
+function scRes(level,msg){ const r=$s('scRes'); r.className='res glass '+(level||''); r.textContent=msg; }
+async function scTorch(){ try{ SC.torch=!SC.torch; await SC.track.applyConstraints({advanced:[{torch:SC.torch}]}); }catch(e){} }
+function scClose(notify){
+  clearTimeout(SC.loopT); SC.loopT=null;
+  if(SC.stream){ SC.stream.getTracks().forEach(t=>t.stop()); SC.stream=null; SC.track=null; }
+  $s('scan').style.display='none'; SC.waiting=false; SC.torch=false;
+  if(SC.onClose) SC.onClose(!!notify);
+}
+addEventListener('popstate',()=>{ if($s('scan').style.display==='block') scClose(true); });
+let SC_AC;
+function scBeep(level){
+  try{ SC_AC=SC_AC||new (window.AudioContext||window.webkitAudioContext)(); const tones=level==='ok'?[[1046,.1]]:level==='warn'?[[660,.14],[660,.14]]:[[220,.3],[180,.45]]; let t=SC_AC.currentTime;
+    tones.forEach(([f,d])=>{ const o=SC_AC.createOscillator(), g=SC_AC.createGain(); o.type='square'; o.frequency.value=f; g.gain.value=.15; o.connect(g); g.connect(SC_AC.destination); o.start(t); o.stop(t+d); t+=d+.07; }); }catch(e){}
+  try{ navigator.vibrate&&navigator.vibrate(level==='ok'?80:level==='warn'?[150,80,150]:[260,100,260,100,260]); }catch(e){}
+}
+
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+const net=()=>document.getElementById('off').style.display=navigator.onLine?'none':'block'; addEventListener('online',net); addEventListener('offline',net); net();
+
+if(Q.get('pair') && Q.get('api')){
+  /* ---------- PAIR MODE: this phone = scanner for a PC ---------- */
+  const PAIR=Q.get('pair'), API=Q.get('api');
+  const post=b=>fetch(API,{method:'POST',body:JSON.stringify(b)}).then(r=>r.json());
+  window.TRANSPORT=code=>post({act:'send',pair:PAIR,code:code});
+  window.INFO=()=>post({act:'info',pair:PAIR});
+  document.getElementById('home').style.display='flex';
+  document.getElementById('hmTitle').textContent=(CFG.appName||'Returns Desk')+' · Scanner';
+  
+function setStatus(r){
+  const ok=r&&r.ok;
+  ['hmDot','scDot'].forEach(id=>{ const d=document.getElementById(id); if(d) d.className='dot '+(ok?(r.live?'on':''):'off'); });
+  const t=ok?('Paired with '+r.name+(r.live?' · PC on: '+(r.page||'app'):' · PC page not open')):(r&&r.msg||'Not connected');
+  document.getElementById('hmSt').textContent=t; const s=document.getElementById('scSub'); if(s) s.textContent=t;
+  document.getElementById('hmSub').textContent= ok ? 'Point at any AWB / order / return barcode. Green = OK, red = duplicate or problem.' : 'Open "Connect phone" on the PC and scan the QR again.';
+}
+function startScan(){ scOpen({transport:TRANSPORT, continuous:true, title:'Phone scanner', onClose:()=>{}}); }
+setInterval(()=>INFO().then(setStatus).catch(()=>setStatus({ok:false,msg:'No internet'})), 5000);
+INFO().then(setStatus).catch(()=>setStatus({ok:false,msg:'No internet'}));
+
+} else {
+  /* ---------- APP MODE: full app + native camera bridge ---------- */
+  let APP=null, pend=null;
+  function appUrl(){ return localStorage.getItem('rd_url') || ((CFG.appUrl||'').indexOf('http')===0 ? CFG.appUrl : ''); }
+  window.saveUrl=function(){ const u=document.getElementById('url').value.trim(); if(u.indexOf('https://')!==0) return alert('Enter full https:// URL'); localStorage.setItem('rd_url',u); location.hash=''; location.reload(); };
+  if(location.hash==='#setup' || !appUrl()){ document.getElementById('url').value=appUrl(); document.getElementById('setup').style.display='block'; }
+  else { const f=document.getElementById('app'); f.src=appUrl(); f.style.display='block'; document.title=CFG.appName||'Returns Desk'; }
+  function walk(w,msg,d){ try{ w.postMessage(msg,'*'); }catch(e){} if(d>4) return; try{ for(let i=0;i<w.frames.length;i++) walk(w.frames[i],msg,d+1); }catch(e){} }
+  setInterval(()=>{ try{ walk(document.getElementById('app').contentWindow,{rd:'hello'},0); }catch(e){} }, 2000);
+  addEventListener('message', e=>{
+    const d=e.data; if(!d||typeof d!=='object'||!d.rd) return;
+    if(d.rd==='ack') APP=e.source;
+    if(d.rd==='scan'){ APP=e.source; scOpen({continuous:d.continuous, title:d.title, transport:code=>new Promise(res=>{ pend=res; APP.postMessage({rd:'code',code:code},'*'); }), onClose:n=>{ if(n&&APP) try{ APP.postMessage({rd:'closed'},'*'); }catch(x){} } }); }
+    if(d.rd==='result' && pend){ const p=pend; pend=null; p({level:d.level,msg:d.msg}); }
+    if(d.rd==='stop') scClose(false);
+  });
+}
+</script>
+</body>
+</html>
